@@ -44,11 +44,16 @@ int main(int argc, char* argv)
 		printf("Enter message : ");
 		gets(message);
 		//send the message
+		int broadcast=1;
+        if (setsockopt(s,SOL_SOCKET,SO_BROADCAST,
+            &broadcast,sizeof(broadcast))==-1) {
+            die("setsockopt");
+        }
 		if (sendto(s, message, strlen(message) , 0 , (struct sockaddr *) &si_other, slen)==-1)
 		{
 			die("sendto()");
 		}
-		
+
 		//receive a reply and print it
 		//clear the buffer by filling null, it might have previously received data
 		memset(buf,'\0', BUFLEN);
@@ -61,6 +66,5 @@ int main(int argc, char* argv)
 		puts(buf);
 	}
 
-	close(s);
 	return 0;
 }
