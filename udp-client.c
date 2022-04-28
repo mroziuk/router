@@ -7,7 +7,7 @@
 #include<arpa/inet.h>
 #include<sys/socket.h>
 
-#define SERVER "127.0.0.1"
+#define SERVER "192.168.0.2"
 #define BUFLEN 512	//Max length of buffer
 #define PORT 8888	//The port on which to send data
 
@@ -17,7 +17,7 @@ void die(char *s)
 	exit(1);
 }
 
-int main(void)
+int main(int argc, char* argv)
 {
 	struct sockaddr_in si_other;
 	int s, i, slen=sizeof(si_other);
