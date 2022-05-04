@@ -17,6 +17,12 @@ void die(char *s)
 	exit(1);
 }
 
+void print_as_bytes (unsigned char* buff, ssize_t length)
+{
+	for (ssize_t i = 0; i < length; i++, buff++)
+		printf ("%.2x ", *buff);	
+}
+
 int main(int argc, char* argv)
 {
 	struct sockaddr_in si_other;
