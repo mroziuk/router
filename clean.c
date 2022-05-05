@@ -4,6 +4,7 @@
 #include <time.h>
 #include<arpa/inet.h>
 #include<sys/socket.h>
+#include <sys/types.h>
 #define BUFLEN 9	//Max length of buffer
 #define PORT 54321	//The port on which to send data
 #define DELAY 5.0
@@ -110,6 +111,13 @@ int main(int argc, char const *argv[]){
 	}
     // end setting up server
 
+    //set up for waiting
+    struct timeval read_timeout;
+    read_timeout.tv_sec = 0;
+    read_timeout.tv_usec = 10;
+    setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
+    // setsockopt()
+
     time_t start, end;        
     while(1){
         // time(&start);
@@ -127,6 +135,7 @@ int main(int argc, char const *argv[]){
             if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1){
                 die("sendto()");
             }
+            printf("waited enough");
         //}while(difftime(end, start) <= DELAY );
         //send packets here
 
