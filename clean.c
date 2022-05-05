@@ -112,9 +112,9 @@ int main(int argc, char const *argv[]){
 
     time_t start, end;        
     while(1){
-        time(&start);
-        do{
-            time(&end);
+        // time(&start);
+        // do{
+        //     time(&end);
             //recieve packets here
             //try to receive some data, this is a blocking call
             if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1){
@@ -127,11 +127,11 @@ int main(int argc, char const *argv[]){
             if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1){
                 die("sendto()");
             }
-        }while(difftime(end, start) <= DELAY );
+        //}while(difftime(end, start) <= DELAY );
         //send packets here
 
 
-        printf("elo\n");
+        //printf("elo\n");
     }
 
 
