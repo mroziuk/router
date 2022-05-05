@@ -163,10 +163,11 @@ int main(int argc, char const *argv[]){
             }
 
             for(int i=0;i<n;i++){
-                char *message;
-                fromBytesToSrtingWithoutMask(c[i].address, 5, message);
+                char message[10];
+                strncpy(message, c[i].address, 5);
+                //fromBytesToSrtingWithoutMask(c[i].address, 5, message);
                 intToArray(c[i].distance, message+5);
-                if (sendto(s,c[i].address, 9, 0 , (struct sockaddr *) &si_other, slen)==-1)
+                if (sendto(s,message, 9, 0 , (struct sockaddr *) &si_other, slen)==-1)
                 {
                     die("sendto()");
                 }
