@@ -145,23 +145,12 @@ int main(int argc, char const *argv[]){
         time(&start);
         do{
             time(&end);
-            //recieve packets here
-            //try to receive some data, this is a blocking call
-                // if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1){
-                //     die("recvfrom()");
-                // }
-            
+            //get all packets
             while( recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) > 0){
-                //*buf = *empty;
-                //print details of the client/peer and the data received
                 printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-                //printf("Data: %s\n" , buf);
                 print_as_bytes(buf, 5);
-                printf("%d", arrayToint(buf+5));
-                //now reply the client with the same data
-                // if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1){
-                //     //die("sendto()");
-                // }
+                printf("%d\n", arrayToint(buf+5));
+                //process recieved data
             }
             
             //printf("waited enough");
@@ -174,7 +163,7 @@ int main(int argc, char const *argv[]){
             }
 
             for(int i=0;i<n;i++){
-                char message[10];
+                char *message;
                 fromBytesToSrtingWithoutMask(c[i].address, 5, message);
                 intToArray(c[i].distance, message+5);
                 if (sendto(s,c[i].address, 9, 0 , (struct sockaddr *) &si_other, slen)==-1)
