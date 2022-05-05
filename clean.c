@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #define BUFLEN 9	//Max length of buffer
 #define PORT 54321	//The port on which to send data
-#define DELAY 5.0
+#define DELAY 2.0
 void print_as_bytes (unsigned char* buff, ssize_t length){
 	for (ssize_t i = 0; i < length; i++, buff++)
 		printf ("%.2x ", *buff);	
@@ -86,7 +86,15 @@ void getUserInput(struct connection c[], int *n){
         c[i].distance = d;
     }
 }
-
+int arrayToint(char arr[]){
+    return (arr[0] << 24) | (arr[1] << 16) | (arr[2] << 8) | arr[3];
+}
+void intToArray(int x, char arr[]){
+    arr[0] = (x >> 24) & 0xFF;
+    arr[1] = (x >> 16) & 0xFF;
+    arr[2] = (x >>  8) & 0xFF;
+    arr[3] = (x      ) & 0xFF;
+}
 
 int main(int argc, char const *argv[]){
     //create array of connections
@@ -119,20 +127,13 @@ int main(int argc, char const *argv[]){
 	}
     // end setting up server
     // client side configuration
-    struct sockaddr_in si_other_c;
-	int sc, slen_c=sizeof(si_other_c);
-	char buf_client[BUFLEN];
-	char message[BUFLEN] = "message";
-    if ( (sc=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
-		die("socket");
-	}
-    memset((char *) &si_other_c, 0, sizeof(si_other));
-	si_other_c.sin_family = AF_INET;
-	si_other_c.sin_port = htons(PORT);
+    memset((char *) &si_other, 0, sizeof(si_other));
+	si_other.sin_family = AF_INET;
+	si_other.sin_port = htons(PORT);
+
 	char server_address[20];
     fromBytesToSrtingWithoutMask(c[0].address,5,server_address);
-    printf("%s", server_address);
-	if (inet_aton(server_address , &si_other_c.sin_addr) == 0) 
+	if (inet_aton(server_address , &si_other.sin_addr) == 0) 
 	{
 		fprintf(stderr, "inet_aton() failed\n");
 		exit(1);
@@ -150,30 +151,38 @@ int main(int argc, char const *argv[]){
                 //     die("recvfrom()");
                 // }
             
-            if( recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) > 0){
-                char empty[9] = "datadata\0";
-                *buf = *empty;
+            while( recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) > 0){
+                //*buf = *empty;
                 //print details of the client/peer and the data received
                 printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-                printf("Data: %s\n" , buf);
+                //printf("Data: %s\n" , buf);
+                print_as_bytes(buf, 5);
+                printf("%d", arrayToint(buf+5));
                 //now reply the client with the same data
-                if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1){
-                    //die("sendto()");
-                }
+                // if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1){
+                //     //die("sendto()");
+                // }
             }
             
             //printf("waited enough");
         }while(difftime(end, start) <= DELAY );
         //send packets here
             int broadcast=1;
-            if (setsockopt(sc,SOL_SOCKET,SO_BROADCAST,
+            if (setsockopt(s,SOL_SOCKET,SO_BROADCAST,
                 &broadcast,sizeof(broadcast))==-1) {
                 die("setsockopt");
             }
-            if (sendto(sc, message, strlen(message) , 0 , (struct sockaddr *) &si_other_c, slen_c)==-1)
-            {
-                die("sendto()");
+
+            for(int i=0;i<n;i++){
+                char message[10];
+                fromBytesToSrtingWithoutMask(c[i].address, 5, message);
+                intToArray(c[i].distance, message+5);
+                if (sendto(s,c[i].address, 9, 0 , (struct sockaddr *) &si_other, slen)==-1)
+                {
+                    die("sendto()");
+                }
             }
+            
         //
     }
 

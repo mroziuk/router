@@ -28,6 +28,28 @@ void fromStringToBytes(char str[], unsigned char buff[] ){
     
 
 }
+int arrayToint(char arr[]){
+    return (arr[0] << 24) | (arr[1] << 16) | (arr[2] << 8) | arr[3];
+}
+void intToArray(int x, char arr[]){
+    arr[0] = (x >> 24) & 0xFF;
+    arr[1] = (x >> 16) & 0xFF;
+    arr[2] = (x >>  8) & 0xFF;
+    arr[3] = (x      ) & 0xFF;
+}
+
+int main(int argc, char const *argv[])
+{
+
+    char arr[4];
+    int n = 4097 + 1;
+    intToArray(n, arr);
+
+    print_as_bytes(arr, 4);
+    printf("%d", arrayToint(arr));
+    return 0;
+}
+
 
 // int main(int argc, char const *argv[]){
 //     unsigned char buff[] = {192,168,0,1,24};
