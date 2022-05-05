@@ -2,6 +2,7 @@
 #include<string.h> //memset
 #include<stdlib.h> //exit(0);
 #include <time.h>
+#include<fcntl.h>
 #include<arpa/inet.h>
 #include<sys/socket.h>
 #include <sys/types.h>
@@ -100,6 +101,10 @@ int main(int argc, char const *argv[]){
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
 		die("socket");
 	}
+    //
+    int flags = fcntl(s, F_GETFL);
+    flags |= O_NONBLOCK;
+    fcntl(s, F_SETFL, flags);
 	// zero out the structure
 	memset((char *) &si_me, 0, sizeof(si_me));
 	si_me.sin_family = AF_INET;
@@ -112,10 +117,10 @@ int main(int argc, char const *argv[]){
     // end setting up server
 
     //set up for waiting
-    struct timeval read_timeout;
-    read_timeout.tv_sec = 0;
-    read_timeout.tv_usec = 10;
-    setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
+    // struct timeval read_timeout;
+    // read_timeout.tv_sec = 0;
+    // read_timeout.tv_usec = 10;
+    // setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
     // setsockopt()
 
     time_t start, end;        
@@ -125,15 +130,18 @@ int main(int argc, char const *argv[]){
         //     time(&end);
             //recieve packets here
             //try to receive some data, this is a blocking call
-            if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1){
-                die("recvfrom()");
-            }
+                // if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1){
+                //     die("recvfrom()");
+                // }
+            recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen);
+            char empty[9] = "dupa\0";
+            *buf = *empty;
             //print details of the client/peer and the data received
             printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
             printf("Data: %s\n" , buf);
             //now reply the client with the same data
             if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1){
-                die("sendto()");
+                //die("sendto()");
             }
             printf("waited enough");
         //}while(difftime(end, start) <= DELAY );
