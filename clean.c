@@ -38,6 +38,7 @@ void fromStringToBytes(char str[], unsigned char buff[] ){
 struct connection{
     unsigned char address[5]; // bajty adresu + maska
     int distance;
+    int connected_directly;
     unsigned char via[5];
 };
 void die(char *s){
@@ -47,10 +48,15 @@ void die(char *s){
 
 void print_connections(struct connection cons[], int n){
     for(int i=0;i<n;i++){
-        char addr[30], via[30] = "directly";
+        char addr[30], via[30];
         fromBytesToSrting(cons[i].address, 5, addr);
-        //fromBytesToSrting(cons[i].via, 5, via);
-        printf("%s distance %d via %s\n", addr, cons[i].distance, via);
+        fromBytesToSrting(cons[i].via, 5, via);
+        if(cons[i].connected_directly == 0){
+            printf("%s distance %d via %s\n", addr, cons[i].distance, via);
+        }else{
+            printf("%s distance %d connected directly\n", addr, cons[i].distance);
+        }
+        
     }
 }
 
@@ -85,6 +91,7 @@ void getUserInput(struct connection c[], int *n){
         fromStringToBytes(addr,bytes);
         memcpy(c[i].address, bytes,5);
         c[i].distance = d;
+        c[i].connected_directly = 1;
     }
 }
 int arrayToint(char arr[]){
