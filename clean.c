@@ -9,13 +9,13 @@
 #include <stdbool.h>
 #define BUFLEN 9	//Max length of buffer
 #define PORT 54321	//The port on which to send data
-#define DELAY 2.0
+#define DELAY 5.0   //time between sending udp packets
 #define MAX_NOT_ANSWERED 10
+
 void print_as_bytes (unsigned char* buff, ssize_t length){
 	for (ssize_t i = 0; i < length; i++, buff++)
 		printf ("%.2x ", *buff);	
 }
-
 void fromBytesToSrting(unsigned char* buff, ssize_t length, char res[]){
     sprintf(res, "%d.%d.%d.%d/%d", buff[0],buff[1],buff[2],buff[3],buff[4]);
 }
@@ -23,7 +23,6 @@ void fromBytesToSrtingWithoutMask(unsigned char* buff, ssize_t length, char res[
     sprintf(res, "%d.%d.%d.%d", buff[0],buff[1],buff[2],buff[3]);
 }
 void fromStringToBytes(char str[], unsigned char buff[] ){
-    //int buff[5];
     int index = 0;
     char* rest = NULL;
     unsigned char* token;
@@ -31,7 +30,6 @@ void fromStringToBytes(char str[], unsigned char buff[] ){
     for(token = strtok_r(str, "./", &rest);
         token != NULL;
         token = strtok_r(NULL, "./", &rest)){
-            //printf("%s", token);
             buff[index] = (unsigned char)atoi(token);
             index ++;
     }
@@ -54,11 +52,10 @@ void print_connections(struct connection cons[], int n){
         fromBytesToSrting(cons[i].address, 5, addr);
         fromBytesToSrtingWithoutMask(cons[i].via, 5, via);
         if(cons[i].connected_directly == 0){
-            printf("%s distance %d via %s, l:%d\n", addr, cons[i].distance, via, cons[i].time_from_last_recived);
+            printf("%s distance %d via %s\n", addr, cons[i].distance, via);
         }else{
             printf("%s distance %d connected directly\n", addr, cons[i].distance);
-        }
-        
+        }  
     }
 }
 
@@ -194,10 +191,6 @@ int main(int argc, char const *argv[]){
             time(&end);
             //get all packets
             while( recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) > 0){
-                // printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-                // print_as_bytes(buf, 5);
-                // printf("%d\n", arrayToint(buf+5));
-                //process recieved data
                 //jesli jest taki addres sprawdz odleglosc
                 char sender_addr[5]; // 
                 fromStringToBytes(inet_ntoa(si_other.sin_addr),sender_addr);
