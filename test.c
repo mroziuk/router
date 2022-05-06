@@ -38,17 +38,38 @@ void intToArray(int x, char arr[]){
     arr[3] = (x      ) & 0xFF;
 }
 
-int main(int argc, char const *argv[])
-{
+// int main(int argc, char const *argv[])
+// {
 
-    char arr[4];
-    int n = 4097 + 1;
-    intToArray(n, arr);
+//     char arr[4];
+//     int n = 4097 + 1;
+//     intToArray(n, arr);
 
-    print_as_bytes(arr, 4);
-    printf("%d", arrayToint(arr));
+//     print_as_bytes(arr, 4);
+//     printf("%d", arrayToint(arr));
+//     return 0;
+// }
+struct connection{
+    unsigned char address[5]; // bajty adresu + maska
+    int distance;
+    unsigned char via[5];
+};
+int main(int argc, char const *argv[]){
+
+    char message[10] = {0};
+
+    struct connection c[100];
+    c[0].address[0] = 1;
+    c[0].address[1] = 17;
+    c[0].address[2] = 22;
+    c[0].address[3] = 6;
+    c[0].address[4] = 1;
+    strncpy(message+5, c[0].address, 5);
+
+    print_as_bytes(message, 10);
     return 0;
 }
+
 
 
 // int main(int argc, char const *argv[]){
