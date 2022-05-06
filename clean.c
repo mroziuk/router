@@ -175,7 +175,7 @@ int main(int argc, char const *argv[]){
                     // find distance of matching addr
                     for(int i=0;i<n;i++){
                         if(memcmp(buf,c[i].address,4) == 0){
-                            cr[m].distance = arrayToint(buf+5) + c[i].distance;
+                            cr[m].distance = /*arrayToint(buf+5) + */ c[i].distance;
                         }
                     }
                     m += 1;
