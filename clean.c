@@ -144,8 +144,7 @@ int main(int argc, char const *argv[]){
     // get initial configuration
     getUserInput(c, &n);
 
-
-    //creating data for server side / listening
+    //reciveing / listening
     struct sockaddr_in si_me, si_other;
 	int s, i, slen = sizeof(si_other) , recv_len;
 	char buf[BUFLEN];
@@ -153,7 +152,7 @@ int main(int argc, char const *argv[]){
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
 		die("socket");
 	}
-    //
+    // turn off blocking 
     int flags = fcntl(s, F_GETFL);
     flags |= O_NONBLOCK;
     fcntl(s, F_SETFL, flags);
@@ -166,8 +165,8 @@ int main(int argc, char const *argv[]){
 	if( bind(s , (struct sockaddr*)&si_me, sizeof(si_me) ) == -1){
 		die("bind");
 	}
-    // end setting up server
-    // client side configuration
+
+    // sending configuration
     memset((char *) &si_other, 0, sizeof(si_other));
 	si_other.sin_family = AF_INET;
 	si_other.sin_port = htons(PORT);
@@ -222,7 +221,6 @@ int main(int argc, char const *argv[]){
                 }
             }
             
-            //printf("waited enough");
         }while(difftime(end, start) <= DELAY );
         //send packets here
             int broadcast=1;
@@ -234,35 +232,12 @@ int main(int argc, char const *argv[]){
             for(int i=0;i<n;i++){
                 unsigned char message[10];
                 memcpy(message, c[i].address, 5);
-                //fromBytesToSrtingWithoutMask(c[i].address, 5, message);
                 intToArray(c[i].distance, message+5);
                 if (sendto(s,message, 9, 0 , (struct sockaddr *) &si_other, slen)==-1)
                 {
                     die("sendto()");
                 }
             }
-            
-        //
     }
-
-
-
-
-    //print connections
-    print_connections(c, n);
-
     return 0;
 }
-
-
-
-/*
-3
-1.1.1.1/24 d 1
-2.2.2.2/24 d 2
-3.3.3.3/24 d 3
-*/
-
-/*
-git add . && git commit -m "change" && git push
-*/
