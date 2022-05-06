@@ -154,10 +154,27 @@ int main(int argc, char const *argv[]){
             //get all packets
             while( recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) > 0){
                 // printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-                print_as_bytes(buf, 5);
-                printf("%d\n", arrayToint(buf+5));
+                // print_as_bytes(buf, 5);
+                // printf("%d\n", arrayToint(buf+5));
                 //process recieved data
                 //jesli jest taki addres sprawdz odleglosc
+                int address_exists = 0; // false
+                for(int i=0;i<n;i++){
+                    if(memcmp(buf,c[i].address, 4) == 0){// strings are equal
+                        address_exists = 1; //true
+                    } 
+                }
+                for(int i=0;i<m;i++){
+                    if(memcmp(buf,cr[i].address, 4) == 0){// strings are equal
+                        address_exists = 1; //true
+                    } 
+                }
+                if(address_exists == 0){ //address doesnt eists
+                    memcpy(cr[m].address, buf, 5);
+                    // TODO add dist
+
+                    m++;
+                }
                 
             }
             
@@ -171,8 +188,8 @@ int main(int argc, char const *argv[]){
             }
 
             for(int i=0;i<n;i++){
-                char message[10];
-                strncpy(message, c[i].address, 5);
+                unsigned char message[10];
+                memcpy(message, c[i].address, 5);
                 //fromBytesToSrtingWithoutMask(c[i].address, 5, message);
                 intToArray(c[i].distance, message+5);
                 if (sendto(s,message, 9, 0 , (struct sockaddr *) &si_other, slen)==-1)
