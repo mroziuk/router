@@ -10,6 +10,7 @@
 #define BUFLEN 9	//Max length of buffer
 #define PORT 54321	//The port on which to send data
 #define DELAY 2.0
+#define MAX_NOT_ANSWERED 10
 void print_as_bytes (unsigned char* buff, ssize_t length){
 	for (ssize_t i = 0; i < length; i++, buff++)
 		printf ("%.2x ", *buff);	
@@ -40,6 +41,7 @@ struct connection{
     int distance;
     int connected_directly;
     unsigned char via[5];
+    int time_from_last_recived;
 };
 void die(char *s){
 	perror(s);
@@ -50,9 +52,9 @@ void print_connections(struct connection cons[], int n){
     for(int i=0;i<n;i++){
         char addr[30], via[30];
         fromBytesToSrting(cons[i].address, 5, addr);
-        fromBytesToSrting(cons[i].via, 5, via);
+        fromBytesToSrtingWithoutMask(cons[i].via, 5, via);
         if(cons[i].connected_directly == 0){
-            printf("%s distance %d via %s\n", addr, cons[i].distance, via);
+            printf("%s distance %d via %s, l:%d\n", addr, cons[i].distance, via, cons[i].time_from_last_recived);
         }else{
             printf("%s distance %d connected directly\n", addr, cons[i].distance);
         }
@@ -92,6 +94,7 @@ void getUserInput(struct connection c[], int *n){
         memcpy(c[i].address, bytes,5);
         c[i].distance = d;
         c[i].connected_directly = 1;
+        c[i].time_from_last_recived = 0;
     }
 }
 int arrayToint(char arr[]){
@@ -104,7 +107,38 @@ void intToArray(int x, char arr[]){
     arr[3] = (x      ) & 0xFF;
 }
 
+void increase_time_from_last_message(struct connection c[], int n){
+    for(int i=0;i<n;i++){
+        c[i].time_from_last_recived += 1;
+    }
+}
+void update_time_from_last_message(struct connection c[], int n, char addr[]){
+    for(int i=0;i<n;i++){
+        if(memcmp(c[i].address, addr, 4)== 0){
+            c[i].time_from_last_recived = 0;
+        }
+    }
+}
+void swap(void* a, void* b, int n){
+    unsigned char* p;
+    unsigned char* q;
+    unsigned char* const sentry = (unsigned char*)a + n;
 
+    for(p = a, q = b; p < sentry; ++p, ++q){
+        const unsigned char t = *p;
+        *p = *q;
+        *q = t;
+    }
+}
+void remove_unreachable_network(struct connection c[], int *n){
+    for(int i=0;i<*n;i++){
+        if(c[i].time_from_last_recived > MAX_NOT_ANSWERED){
+            swap(&c[i],&c[*n-1], sizeof(struct connection));
+            *n -= 1;
+            return; 
+        }
+    }
+}
 int main(int argc, char const *argv[]){
     //create array of connections
     int n, m = 0;
@@ -152,6 +186,7 @@ int main(int argc, char const *argv[]){
 
     time_t start, end;        
     while(1){
+        increase_time_from_last_message(c,n);
         print_connections(c,n);
         print_connections(cr,m);
         time(&start);
@@ -164,6 +199,10 @@ int main(int argc, char const *argv[]){
                 // printf("%d\n", arrayToint(buf+5));
                 //process recieved data
                 //jesli jest taki addres sprawdz odleglosc
+                char sender_addr[5]; // 
+                fromStringToBytes(inet_ntoa(si_other.sin_addr),sender_addr);
+                update_time_from_last_message(c,n,sender_addr);
+
                 int address_exists = 0; // false
                 for(int i=0;i<n;i++){
                     if(memcmp(buf,c[i].address, 4) == 0){// strings are equal
@@ -181,11 +220,9 @@ int main(int argc, char const *argv[]){
                     cr[m].connected_directly = 0;
                     // find distance of matching addr
                     for(int i=0;i<n;i++){
-                        char addr_reciever[5];
-                        fromStringToBytes(inet_ntoa(si_other.sin_addr),addr_reciever);
-                        if(memcmp(addr_reciever,c[i].address,4) == 0){
+                        if(memcmp(sender_addr,c[i].address,4) == 0){
                             cr[m].distance = arrayToint(buf+5) +  c[i].distance;
-                            memcpy(cr[m].via, addr_reciever, 5);
+                            memcpy(cr[m].via, sender_addr, 5);
                         }
                     }
                     m += 1;
