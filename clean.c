@@ -158,26 +158,7 @@ int main(int argc, char const *argv[]){
                 printf("%d\n", arrayToint(buf+5));
                 //process recieved data
                 //jesli jest taki addres sprawdz odleglosc
-                int address_found = -1;
-                for(int i=0;i<n;i++){
-                    if(memcmp(buf, c[i].address,5) == 0){
-                        address_found = 0;
-                    }
-                }
-
-                //jesli nie ma dodaj i tak
-                if(address_found == 0){
-                    strncpy(cr[m].address, buf, 5);
-                    //find from who this was recived
-                    int distance;
-                    for(int i=0;i<n;i++){
-                        if(memcmp(&si_other.sin_addr, c[i].address,4) == 0){
-                            distance = c[i].distance;
-                        }
-                }
-                    cr[m].distance = distance + arrayToint(buf+5);
-                    m += 1;
-                }
+                
             }
             
             //printf("waited enough");
