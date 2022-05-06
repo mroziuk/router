@@ -147,6 +147,7 @@ int main(int argc, char const *argv[]){
     time_t start, end;        
     while(1){
         print_connections(c,n);
+        print_connections(cr,m);
         time(&start);
         do{
             time(&end);
@@ -160,13 +161,13 @@ int main(int argc, char const *argv[]){
                 int address_found = -1;
                 for(int i=0;i<n;i++){
                     if(memcmp(buf, c[i].address,5) == 0){
-                        address_found = true;
+                        address_found = 0;
                     }
                 }
 
                 //jesli nie ma dodaj i tak
                 if(address_found == 0){
-                    strncpy(c[i].address, buf, 5);
+                    strncpy(cr[m].address, buf, 5);
                     //find from who this was recived
                     int distance;
                     for(int i=0;i<n;i++){
@@ -174,8 +175,8 @@ int main(int argc, char const *argv[]){
                             distance = c[i].distance;
                         }
                 }
-                    c[n].distance = distance + arrayToint(buf+5);
-                    n += 1;
+                    cr[n].distance = distance + arrayToint(buf+5);
+                    m += 1;
                 }
             }
             
