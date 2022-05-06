@@ -178,6 +178,7 @@ int main(int argc, char const *argv[]){
                 if(address_exists == 0){ //address doesnt eists
                     //add new address
                     memcpy(cr[m].address, buf, 5);
+                    cr[m].connected_directly = 0;
                     // find distance of matching addr
                     for(int i=0;i<n;i++){
                         char addr_reciever[5];
