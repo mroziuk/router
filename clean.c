@@ -174,7 +174,9 @@ int main(int argc, char const *argv[]){
 
                     // find distance of matching addr
                     for(int i=0;i<n;i++){
-                        if(memcmp(buf,c[i].address,4) == 0){
+                        char addr_reciever[5];
+                        fromStringToBytes(inet_ntoa(si_other.sin_addr),addr_reciever);
+                        if(memcmp(addr_reciever,c[i].address,4) == 0){
                             cr[m].distance = /*arrayToint(buf+5) + */ c[i].distance;
                         }
                     }
