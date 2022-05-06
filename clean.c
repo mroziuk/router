@@ -6,6 +6,7 @@
 #include<arpa/inet.h>
 #include<sys/socket.h>
 #include <sys/types.h>
+#include <stdbool.h>
 #define BUFLEN 9	//Max length of buffer
 #define PORT 54321	//The port on which to send data
 #define DELAY 2.0
@@ -96,10 +97,13 @@ void intToArray(int x, char arr[]){
     arr[3] = (x      ) & 0xFF;
 }
 
+
+
 int main(int argc, char const *argv[]){
     //create array of connections
-    int n;
+    int n, m = 0;
     struct connection c[100];
+    struct connection cr[100];
     // get initial configuration
     getUserInput(c, &n);
 
@@ -142,15 +146,37 @@ int main(int argc, char const *argv[]){
 
     time_t start, end;        
     while(1){
+        print_connections(c,n);
         time(&start);
         do{
             time(&end);
             //get all packets
             while( recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) > 0){
-                printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-                print_as_bytes(buf, 5);
-                printf("%d\n", arrayToint(buf+5));
+                // printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+                // print_as_bytes(buf, 5);
+                // printf("%d\n", arrayToint(buf+5));
                 //process recieved data
+                //jesli jest taki addres sprawdz odleglosc
+                int address_found = -1;
+                for(int i=0;i<n;i++){
+                    if(memcmp(buf, c[i].address,5) == 0){
+                        address_found = true;
+                    }
+                }
+
+                //jesli nie ma dodaj i tak
+                if(address_found == 0){
+                    strncpy(c[i].address, buf, 5);
+                    //find from who this was recived
+                    int distance;
+                    for(int i=0;i<n;i++){
+                        if(memcmp(&si_other.sin_addr, c[i].address,4) == 0){
+                            distance = c[i].distance;
+                        }
+                }
+                    c[n].distance = distance + arrayToint(buf+5);
+                    n += 1;
+                }
             }
             
             //printf("waited enough");
