@@ -98,7 +98,6 @@ void intToArray(int x, char arr[]){
 }
 
 
-
 int main(int argc, char const *argv[]){
     //create array of connections
     int n, m = 0;
@@ -170,12 +169,17 @@ int main(int argc, char const *argv[]){
                     } 
                 }
                 if(address_exists == 0){ //address doesnt eists
+                    //add new address
                     memcpy(cr[m].address, buf, 5);
-                    // TODO add dist
 
-                    m++;
+                    // find distance of matching addr
+                    for(int i=0;i<n;i++){
+                        if(memcmp(buf,c[i].address,4) == 0){
+                            cr[m].distance = arrayToint(buf+5) + c[i].distance;
+                        }
+                    }
+                    m += 1;
                 }
-                
             }
             
             //printf("waited enough");
