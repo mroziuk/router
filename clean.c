@@ -171,13 +171,13 @@ int main(int argc, char const *argv[]){
                 if(address_exists == 0){ //address doesnt eists
                     //add new address
                     memcpy(cr[m].address, buf, 5);
-
                     // find distance of matching addr
                     for(int i=0;i<n;i++){
                         char addr_reciever[5];
                         fromStringToBytes(inet_ntoa(si_other.sin_addr),addr_reciever);
                         if(memcmp(addr_reciever,c[i].address,4) == 0){
                             cr[m].distance = arrayToint(buf+5) +  c[i].distance;
+                            memcpy(cr[m].via, addr_reciever, 5);
                         }
                     }
                     m += 1;
