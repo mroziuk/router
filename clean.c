@@ -154,8 +154,8 @@ int main(int argc, char const *argv[]){
             //get all packets
             while( recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) > 0){
                 // printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-                // print_as_bytes(buf, 5);
-                // printf("%d\n", arrayToint(buf+5));
+                print_as_bytes(buf, 5);
+                printf("%d\n", arrayToint(buf+5));
                 //process recieved data
                 //jesli jest taki addres sprawdz odleglosc
                 int address_found = -1;
@@ -175,7 +175,7 @@ int main(int argc, char const *argv[]){
                             distance = c[i].distance;
                         }
                 }
-                    cr[n].distance = distance + arrayToint(buf+5);
+                    cr[m].distance = distance + arrayToint(buf+5);
                     m += 1;
                 }
             }
@@ -219,4 +219,8 @@ int main(int argc, char const *argv[]){
 1.1.1.1/24 d 1
 2.2.2.2/24 d 2
 3.3.3.3/24 d 3
+*/
+
+/*
+git add . && git commit -m "change" && git push
 */
